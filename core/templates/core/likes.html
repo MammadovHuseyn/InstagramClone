@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load mathfilters %}
+{% block content %}
+    
+
+    <main class="main-container">
+   
+            <section class="content-container">
+            <div class="posts">
+                <h1 class= "profile-user-name"> Likes</h1>
+                <hr>
+                {% for user in likes  %}
+                
+                <div class="side-menu__user-profile">
+                    <a href="https://github.com/leocosta1" target="_blank" class="side-menu__user-avatar">
+                        <img src="{{user.image.url}}" alt="User Picture">
+                    </a>
+                    <div class="side-menu__user-info">
+                        <a href="{% url 'user_detail' user.username %}" target="_blank">{{user}}</a>
+                        <span>{{user.first_name}} {{user.last_name}}</span>
+                    </div>
+                    
+                    <form action="{% url 'follow' %}" method="POST" name='profile_detail'>
+                        {% csrf_token %}
+                        <input type = 'hidden' name = 'follower' value = {{request.user}}>
+                        <input type = 'hidden' name = 'following' value = {{user}} >
+                        
+                        {% if user != request.user %}
+                        {% if user in my_following %}
+                        <input type = 'hidden' name = 'value' value = 'search_unfollow'>
+                        <button class="btn profile-edit-btn">Unfollow</button>
+                        {% else %}
+                        <input type = 'hidden' name = 'value' value = 'search_follow'>
+                        <button class="btn profile-edit-btn form-btn">Follow</button>
+                        {% endif %}
+                        {% endif %}
+                       
+                    </form>
+                    
+                </div>
+                <hr>
+               
+                {% endfor %}
+               
+                <div class="side-menu__footer">
+                    <div class="side-menu__footer-links">
+                        <ul class="side-menu__footer-list">
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">About</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Help</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Press</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">API</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Jobs</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Privacy</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Terms</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Locations</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Top Accounts</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Hashtag</a>
+                            </li>
+                            <li class="side-menu__footer-item">
+                                <a class="side-menu__footer-link" href="#">Language</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <span class="side-menu__footer-copyright">&copy; 2021 instagram from facebook</span>
+                </div>
+            </section>
+        </section>
+    </main>
+
+   
+
+        
+{% endblock  %}

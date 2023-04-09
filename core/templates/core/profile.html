@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <header>
+
+        <div class="container" style="margin-top:30px;">
+            
+            
+            <div class="profile">
+                
+                <div class="profile-image">
+                    <img src={{user.image.url}} alt="" style="width: 200px; height: 200px;">
+
+                </div>
+
+                <div class="profile-user-settings">
+                    
+                    <form action="{% url 'follow' %}" method="POST" name='profile_detail'>
+                        {% csrf_token %}
+                        <input type = 'hidden' name = 'follower' value = {{request.user}}>
+                        <input type = 'hidden' name = 'following' value = {{user.username}} >
+                        <h1 class="profile-user-name">{{user.username}}</h1>
+                        
+
+                        {% if user != request.user %}
+                        {% if followcheck %}
+                        <input type = 'hidden' name = 'value' value = 'p_unfollow'>
+                        <button class="btn profile-edit-btn">Unfollow</button>
+                        {% else %}
+                        <input type = 'hidden' name = 'value' value = 'p_follow'>
+                        <button class="btn profile-edit-btn ">Follow</button>
+                        {% endif %}
+                        {% endif %}
+                        {% if user == request.user %}
+                        <a href="{% url 'editprofile' user.username %}" class="btn profile-edit-btn">Edit Profile</a>
+                        <button class="btn profile-settings-btn" aria-label="profile settings"><i class="fas fa-cog" aria-hidden="true"></i></button>
+                        {% endif %}
+                        
+                        
+                    </form>
+                    
+                   
+                    {% comment %} <button class="btn profile-edit-btn">Edit Profile</button> {% endcomment %}
+
+                    
+
+                </div>
+
+                <div class="profile-stats">
+
+                    <ul>
+                        <li><span class="profile-stat-count">{{user_posts_count}}</span> posts</li>
+                        <li><a href = {% url 'show_followers' user.username %}><span class="profile-stat-count">{{user_follower.count}}</span> followers</li></a>
+                        <li><a href = {% url 'show_following' user.username %}><span class="profile-stat-count">{{user_following.count}}</span> following</li></a>
+                    </ul>
+
+                </div>
+
+                <div class="profile-bio">
+
+                    <p><span class="profile-real-name">{{user.first_name}} {{user.last_name}}</span><br>{{user.profile.about}}</p>
+
+                </div>
+
+            </div>
+            <!-- End of profile section -->
+
+        </div>
+
+        <!-- End of container -->
+
+    </header>
+
+
+    
+    <main>
+
+        <div class="container">
+            <hr>
+            <nav class="header__content">
+                <div class="header__buttons">    
+        
+                </div>
+        
+                <div class="header__buttons header__buttons--desktop ">
+                    <form method='POST' action="{% url 'user_detail' user.username  %}">
+                        {% csrf_token %}
+                    <button class="post__button" type='submit'>
+                        <input type="hidden" name="action" value="allposts" />
+                        <svg aria-label="" class="_ab6-" color="rgb(0, 0, 0)" fill="rgb(0, 0, 0)" height="24" role="img" viewBox="0 0 24 24" width="24"><rect fill="none" height="18" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" width="18" x="3" y="3"></rect><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="9.015" x2="9.015" y1="3" y2="21"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="14.985" x2="14.985" y1="3" y2="21"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="21" x2="3" y1="9.015" y2="9.015"></line><line fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="21" x2="3" y1="14.985" y2="14.985"></line></svg>        
+                    </button>
+                     </form>
+                     {% if request.user == user %}
+                    <form method='POST' action="{% url 'user_detail' user.username  %}">
+                        {% csrf_token %}
+                    <button class="post__button" type='submit'>
+                        <input type="hidden" name="action" value="favorited" />
+                        <svg aria-label="" class="_ab6-" color="rgb(38, 38, 38)" fill="rgb(38, 38, 38)" height="24" role="img" viewBox="0 0 24 24" width="24"><polygon fill="none" points="20 21 12 13.44 4 21 4 3 20 3 20 21" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></polygon></svg>
+                    </button>
+                </form>
+                {% endif %}
+                    <button class="post__button" type='submit'>
+                        <input type="hidden" name="action" value="tagged" />
+                        <svg aria-label="" class="_ab6-" color="rgb(142, 142, 142)" fill="rgb(142, 142, 142)" height="24" role="img" viewBox="0 0 24 24" width="24"><path d="M10.201 3.797 12 1.997l1.799 1.8a1.59 1.59 0 0 0 1.124.465h5.259A1.818 1.818 0 0 1 22 6.08v14.104a1.818 1.818 0 0 1-1.818 1.818H3.818A1.818 1.818 0 0 1 2 20.184V6.08a1.818 1.818 0 0 1 1.818-1.818h5.26a1.59 1.59 0 0 0 1.123-.465Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><path d="M18.598 22.002V21.4a3.949 3.949 0 0 0-3.948-3.949H9.495A3.949 3.949 0 0 0 5.546 21.4v.603" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path><circle cx="12.072" cy="11.075" fill="none" r="3.556" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></circle></svg>
+                    </button>
+                
+                            
+                    
+                
+                </div>
+                <div class="header__buttons header__buttons--mobile">
+                   
+                </div>
+        
+                <div class="header__buttons header__buttons--desktop">
+                    
+                </div>
+            </nav>
+            
+            {% if user_posts_count == 0 %}
+            <nav class="header__content" style="margin-top:100px;">
+                <div class="header__buttons">                        
+                </div>
+                {% if page != "favorited" %}
+                <div class="header__buttons header__buttons--desktop ">
+                    {% if user == request.user %}
+                    <a href = {% url 'newpost' %} class="fa fa-camera fa-10x post__button" aria-hidden="true"></a>
+                    {% else %}
+                    <i class="fa fa-camera fa-10x post__button" aria-hidden="true"></i>
+                    {% endif %}
+                </div>
+                <div class="header__buttons header__buttons--mobile">
+    
+                </div>                
+                <div class="header__buttons header__buttons--desktop">                    
+                </div>
+            </nav>
+                    {% if user == request.user %}
+                    <h1 class="profile-user-name" style='margin-top:30px; margin-left:350px'>Shared Posts</h1>
+                    {% else %}
+                    <h1 class="profile-user-name" style='margin-top:30px;margin-left:350px'>No Posts Yet</h1>
+                    {% endif %}
+                {% else %}
+                <h1 class="profile-user-name" style='margin-top:30px;'>{{msg}}</h1>
+                {% endif %}
+
+
+            {% endif %}
+                
+                
+            
+           
+            <div class="gallery">
+                
+                {% for post in user_posts  %}
+                <a href="{% url 'detail' post.id %}" target="_blank" class="gallery">
+                <div class="gallery-item" tabindex="0">                   
+                    
+                    <img src="{{post.image.url}}" class="gallery-image" alt="">
+                       
+                    <div class="gallery-item-info">
+
+                        <ul>
+                            <li class="gallery-item-likes"><span class="visually-hidden">Likes:</span><i class="fas fa-heart" aria-hidden="true"></i>{{post.likes}}</li>
+                            <li class="gallery-item-comments"><span class="visually-hidden">Comments:</span><i class="fas fa-comment" aria-hidden="true"></i> {{post.comment.count}} </li>
+                        </ul>
+
+                    </div>
+
+                </div>
+                </a>
+                {% endfor %}
+
+               
+
+            </div>
+            <!-- End of gallery -->
+            {% load static %}
+
+    
+
+
+            {% comment %} <div class="loader"></div> {% endcomment %}
+
+        </div>
+        <!-- End of container -->
+
+    </main>
+
+    {% endblock  %}
