@@ -11,11 +11,3 @@ class PostForm(forms.ModelForm):
         fields = ['image', 'description', 'tags']
 
 
-class CustomUserForm(forms.ModelForm):
-
-    class Meta:
-        model = CustomUser
-        fields = ['image', 'username', 'first_name', 'last_name', 'email', ]
-        widgets = {
-            'image' : forms.FileInput(attrs={"style": "width: 200px; height: 200px;"})
-        }
