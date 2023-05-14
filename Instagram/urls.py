@@ -25,4 +25,6 @@ urlpatterns = [
     path('account/' , include('account.urls')),
     path('comment/' , include('comment.urls')),
     path('', include('social_django.urls', namespace='social')),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api/' , include('api.urls')),
 ] + static(settings.MEDIA_URL , document_root = settings.MEDIA_ROOT)

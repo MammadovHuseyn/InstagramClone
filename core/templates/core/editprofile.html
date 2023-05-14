@@ -21,21 +21,42 @@
     <div class="container">
       <div class=""></div>
       <div class="form-data" style = "max-width:100rem;">
-        <form action="{% url 'newpost' %}" method="POST" enctype="multipart/form-data">
-			{% csrf_token %}
+
+        <form action="{% url 'editprofile' request.user %}" method="POST" enctype="multipart/form-data">
+			    {% csrf_token %}
+          <input type="hidden" name="value" value="edit_profile" />
           <div class="logo">
             <h3 style="padding: 20px; font-size: 20px;">Edit Profile</h3>
           </div>
 
           <div class="profile-image" style = "justify-content:left;">
             <img src={{user.image.url}} alt="" style="width: 200px; height: 200px;">
-            
+            <div style="margin-top:60px;">
+              {{form.first_name}} {{form.last_name}} {{form.username}} {{form.email}} 
+                
+              <div>
+               {{form.bio}}
+              </div>
             </div>
-		 
+            
+          </div>	
+          {{form.image}}
+          <button class="form-btn" type="submit">Save Changes</button>
           
-          <button class="form-btn" type="submit">Post</button>
-          <!-- <a href="index.html" class="form-btn" type="submit">Log in</a> -->
+        </form>
+
+        <form name="change_password" action="{% url 'editprofile' request.user %}" method="POST" >
+          {% csrf_token %}
+          <input type="hidden" name="value" value="change_password" />
+          <h2 style="padding: 20px; font-size: 20px;">Change Password</h2>
+          {% if error is not None %}
+          <h3 style="padding: 10px; font-size: 15px;">{{error}}</h3>
+          {% endif %}
           
+          {{password_form.old_password}}{{password_form.password}} {{password_form.repassword}}
+
+          <button class="form-btn" type="submit">Save Changes</button>
+
         </form>
         
       </div>

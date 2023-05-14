@@ -6,26 +6,28 @@ from django.utils.text import slugify
 
 class CustomUser(AbstractUser):
     image = models.ImageField(upload_to="User_Image" , default = '/User_Image/default-user.png')
-
+    bio = models.TextField(null=True , blank=True)
+    profiletag = models.CharField(max_length=250 , null=True , blank= True)
 
     def __str__(self):
         return self.username
 
     def save(self , *args, **kwargs):
         self.username = self.username.lower()
+        self.profiletag = '@' + self.username
         super(CustomUser , self).save(*args, **kwargs)
-        if not Profile.objects.filter(user = CustomUser.objects.get(username=self.username)).exists():
-            profile = Profile.objects.create(user = CustomUser.objects.get(username=self.username))
-            profile.save()
-
-        if Profile.objects.filter(user = CustomUser.objects.get(username=self.username)).exists():
-            profile = Profile.objects.get(user = CustomUser.objects.get(username=self.username))
-            profile.profiletag = '@' + self.username
-            profile.save()
+        
             
     class Meta:
         verbose_name_plural = 'Users'
 
+class Favorite(models.Model):
+    user  = models.ForeignKey(CustomUser, on_delete = models.CASCADE , related_name="post_favorites")
+    post  = models.ForeignKey("Posts",on_delete = models.CASCADE, related_name="post_favorites" , null=True , blank= True)
+
+    def save(self , *args, **kwargs):
+        if not Favorite.objects.filter(user=self.user , post=self.post).exists():
+            super(Favorite, self).save(*args, **kwargs)
 
 class Create(models.Model):
     created = models.DateTimeField(auto_now_add=True)
@@ -51,17 +53,29 @@ class Posts(Create):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField("CustomUser" , on_delete=models.CASCADE , related_name='profile')
-    favorites = models.ManyToManyField(Posts , related_name = "post_favorites" , blank=True)
-    profiletag = models.CharField(max_length=250 , null=True , blank= True)
-    about = models.TextField(null=True , blank=True)
+    pass
+    # user = models.OneToOneField("CustomUser" , on_delete=models.CASCADE , related_name='profile')
+    # image = models.ImageField(upload_to="User_Image" , default = '/User_Image/default-user.png')
+   
 
-    def __str__(self):
-        return self.user.username        
 
-    def save(self , *args, **kwargs):
-        self.profiletag = '@' + self.user.username
-        super(Profile, self).save(*args, **kwargs)
+    # bio = models.TextField(null=True , blank=True)
+
+    # favorites = models.ManyToManyField(Posts , related_name = "post_favorites" , blank=True)
+    # profiletag = models.CharField(max_length=250 , null=True , blank= True)
+
+    # def __str__(self):
+    #     return self.user.username        
+
+    # def save(self , *args, **kwargs):
+    #     self.profiletag = '@' + self.user.username
+
+    #     self.username = self.user.username
+    #     self.first_name = self.user.first_name
+    #     self.last_name = self.user.last_name
+    #     self.email = self.user.email
+        
+    #     super(Profile, self).save(*args, **kwargs)
 
 class Tags(Create):
     name = models.CharField(max_length=100)
@@ -119,6 +133,11 @@ class Like(Create):
             super(Like, self).save(*args, **kwargs)
             self.post.likes += 1
             self.post.save()
+    
+    def delete(self):
+
+        self.post.likes -= 1
+        super(Like, self).delete()
 
     
 class Story(Create):

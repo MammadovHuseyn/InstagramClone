@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mathfilters',
     'social_django',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -174,8 +175,8 @@ LOGIN_REDIRECT_URL = 'home'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
 
-SOCIAL_AUTH_FACEBOOK_KEY = "1429663247792441"          # App ID
-SOCIAL_AUTH_FACEBOOK_SECRET = "8db2c166990d6ee3a305dcafa90d48b7"       # App Secret
+SOCIAL_AUTH_FACEBOOK_KEY = "1429663247792441"         
+SOCIAL_AUTH_FACEBOOK_SECRET = "8db2c166990d6ee3a305dcafa90d48b7"    
 SOCIAL_AUTH_FACEBOOK_SCOPE = ['email', 'user_link']
 SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
   'fields': 'id, name, email, picture.type(large), link'

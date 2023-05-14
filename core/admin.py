@@ -8,9 +8,9 @@ from .models import *
 class CustomAdmin(UserAdmin):
     list_display = ('username', 'email')
     fieldsets = UserAdmin.fieldsets + (
-        ('Change Avatar', {
+        ('User Extras', {
             "fields": (
-                    ['image' , ]               
+                    ['image' , 'bio' , 'profiletag' ]               
                 
             ),
         }), 
@@ -21,6 +21,10 @@ class CustomAdmin(UserAdmin):
 @admin.register(Posts)
 class PostsAdmin(admin.ModelAdmin):
     list_display = ( 'author',)
+
+@admin.register(Favorite)
+class PostsAdmin(admin.ModelAdmin):
+    list_display = ( 'user',)
 
 @admin.register(Tags)
 class TagsAdmin(admin.ModelAdmin):

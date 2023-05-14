@@ -2,10 +2,11 @@ from django.shortcuts import render , get_object_or_404 , redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.db.models import Q
+from django.contrib.auth.hashers import check_password
 
-from core.models import Posts , Create , Profile , Tags  , Follower , Like , CustomUser 
+from core.models import Posts , Create , Profile , Tags  , Follower , Like , CustomUser , Favorite 
 from comment.models import Comment
-from .forms import PostForm , CustomUserForm
+from .forms import PostForm , UserUpdateForm , ChangePasswordForm
 from comment.forms import CommentForm
 
 # Create your views here.
@@ -40,8 +41,8 @@ def home(request):
    
     #Liked and favorite posts
     liked_posts =[l.post for l in Like.objects.filter(user=request.user).all()]
-    favorites_posts = [l for l in Profile.objects.get(user=request.user).favorites.all()]
-    
+    favorites_posts = [Posts.objects.get(id = l.post.id) for l in Favorite.objects.filter(user=request.user)]
+
     context = {
         'posts': posts,
         'recommed_users' : userlist,
@@ -54,10 +55,10 @@ def home(request):
 
     search_input = request.GET.get('search')
     if search_input:
-        if search_input.startswith('@'):  
+        if search_input.startswith('@') and len(search_input)>1:  
 
-            u = Profile.objects.filter(profiletag__icontains=search_input)
-            users = [CustomUser.objects.get(username = user) for user in u]
+            u = CustomUser.objects.filter(profiletag__icontains=search_input)
+            users = [user for user in u]
             context['users'] = users
 
             return render(request, 'core/profilesearch.html', context)
@@ -122,8 +123,8 @@ def follow(request):
 def detail(request , id):
     post = get_object_or_404(Posts , id = id)
     comments = Comment.objects.filter(post = post)
-    liked_posts = Like.objects.filter(user = request.user , post= post).exists()
-    favorites_posts = [l for l in Profile.objects.get(user=request.user).favorites.all()]
+    liked_posts =[l.post for l in Like.objects.filter(user=request.user).all()]
+    favorites_posts = [Posts.objects.get(id = l.post.id) for l in Favorite.objects.filter(user=request.user)]
     
     #comments 
     if request.method == 'POST':
@@ -226,11 +227,11 @@ def user_detail(request , username):
     if request.method == 'POST':
         if request.POST['action'] == 'favorited':
             user = CustomUser.objects.get(username = username)
-            fav = Profile.objects.get(user=user).favorites.all()
+            fav = [f for f in Favorite.objects.filter(user = user)]
             
-            if fav.count() == 0:
+            if len(fav) == 0:
                 context['msg'] = "You haven't saved anything..."
-            context['user_posts'] = Profile.objects.get(user=user).favorites.all()
+            context['user_posts'] = fav
             context['page'] = "favorited"
             
         elif request.POST['action'] == 'allposts':
@@ -241,13 +242,81 @@ def user_detail(request , username):
 @login_required(login_url='login')
 def editprofile(request , username ):
 
-    return render(request, 'core/editprofile.html')
+   
+    user = get_object_or_404(CustomUser , username=username)
+    form = UserUpdateForm(request.POST or None , files=request.FILES or None , instance= user)
+    password_form = ChangePasswordForm(request.POST or None)
+    error = None
+    
+    if request.method == "POST":
+
+        if request.POST.get("value") == "edit_profile":
+            profile_form = UserUpdateForm(request.POST or None , files=request.FILES or None)
+            if profile_form.is_valid():
+                profile_form.save()
+                return redirect("editprofile")
+
+        elif request.POST.get("value") == "change_password":
+            password_form = ChangePasswordForm(request.POST)
+            if password_form.is_valid():
+                repassword = password_form.cleaned_data["repassword"]
+                password = password_form.cleaned_data["password"]
+                old_password = password_form.cleaned_data["old_password"]
+                if password == repassword:
+                    if check_password(old_password,user.password ):
+                        user.set_password(password)
+                        user.save()
+                        return redirect("login")
+                    else:
+                        context['error'] = "Old password do not match"
+                else:
+                    context["error"] = "Passwords do not match" 
+
+            
+    # if request.POST['value'] == "edit_profile":
+    #     print(form)
+
+    # if request.POST.get('value') == 'change_password':
+        
+    #     if form.is_valid():
+    #         repassword = form.cleaned_data["repassword"]
+    #         password = form.cleaned_data["password"]
+    #         old_password = form.cleaned_data["old_password"]
+    #         current_password = request.user.password
+    #         print(request.POST)
+    #         if check_password(current_password, old_password):
+    #             print('eyni')
+            
+    #         print(old_password)
+    #         print(request.user.password)
+    #         if request.user.password == old_password:
+    #             print(True)
+        
+    # if form.is_valid():       
+       
+    
+    #     form.save()
+    #     return redirect("user_detail" , username = user.username)
+
+        # else:
+        #     error = "Passwords do not match"
+
+    context={
+        "form" : form,
+        "password_form" : password_form,
+        'error' : error
+    }
+    
+   
+    
+    return render(request, 'core/editprofile.html' , context)
 
 @login_required(login_url='login')
 def favorites(request , post_id):
     user = request.user
     post = Posts.objects.get(id=post_id)
-    profile = Profile.objects.get(user=user)
+    profile = CustomUser.objects.get(username = user)
+    print(profile.favorites.all())
     if request.POST.get('value') == 'favorited':
         if profile.favorites.filter(id = post.id).exists():
             profile.favorites.remove(post)
